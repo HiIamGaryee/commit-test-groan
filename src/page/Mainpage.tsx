@@ -20,16 +20,24 @@ function MainPage() {
   };
 
   return (
-    <div className="h-full bg-black">
-      <div className="bg-opacity-75 bg-black fixed top-0 left-0 right-0 py-2 px-4 flex justify-start items-center">
+    <div className="h-full bg-neutral-950">
+      <div className="bg-opacity-75 bg-neutral-950 fixed top-0 left-0 right-0 py-2 px-4 flex justify-start items-center">
         <button onClick={openDialog} className="neon-button">
           Connect Wallet
         </button>
       </div>
-
+      <div className="bg-neutral-950 text-white min-h-screen p-4">
+        <div className="container mx-auto items-center justify-center">
+          <h1 className="text-6xl text-center">Wallet Analytics Platform</h1>
+          <p className="text-2xl text-center">
+            Log in with your wallet to access and visualize your transaction
+            history with detailed graphs.
+          </p>
+        </div>
+      </div>
       {showDialog && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+          className="fixed inset-0 bg-neutral-950	 bg-opacity-50 flex justify-center items-center"
           onClick={closeDialog}
         >
           <div

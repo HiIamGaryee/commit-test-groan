@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import walletData from "../walletData.json";
+import TailwindDialog from "../components/TailwindDialog";
+import AiBot from "../components/AiBot";
 
 function HomePage() {
   let navigate = useNavigate();
@@ -10,12 +12,18 @@ function HomePage() {
     console.log("User logged out");
     navigate("/");
   };
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleClose = () => setIsOpen(false);
+  const handleOpen = () => setIsOpen(true);
 
   return (
     <div className="h-14 bg-gradient-to-r from-purple-500 to-pink-500">
       <h1>Home Page</h1>
       <button onClick={handleLogout}>Log Out</button>
-      <div className="bg-black text-white min-h-screen p-4">
+      <button onClick={handleOpen}>Open Ai Bot</button>
+
+      <div className="bg-neutral-950	 text-white min-h-screen p-4">
         <div className="container mx-auto">
           <h1 className="text-2xl font-bold">Smart Wallet Health Monitor</h1>
           <div className="grid grid-cols-2 gap-4">
@@ -58,6 +66,9 @@ function HomePage() {
             </div>
           </div>
         </div>
+        <TailwindDialog open={isOpen} onClose={handleClose}>
+          <AiBot onClose={handleClose} />
+        </TailwindDialog>
       </div>
     </div>
   );
