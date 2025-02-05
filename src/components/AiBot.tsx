@@ -102,7 +102,7 @@ const AiBot = ({ onClose }: AiBotProps) => {
               scrollBehavior="smooth"
               typingIndicator={
                 isTyping ? (
-                  <TypingIndicator content="Your Baristas, is typing..." />
+                  <TypingIndicator content="Your bae, is typing..." />
                 ) : null
               }
             >
