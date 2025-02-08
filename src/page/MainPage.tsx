@@ -1,17 +1,73 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+<<<<<<< HEAD:src/page/MainPage.tsx
+=======
+import WalletConnect from "@walletconnect/client";
+import QRCodeModal from "@walletconnect/qrcode-modal";
+>>>>>>> 0de52c826f9514e22b0a4042c4533974ca8f2eb5:src/page/Mainpage.tsx
 import { usePrivy } from "@privy-io/react-auth";
 
 function MainPage() {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
+<<<<<<< HEAD:src/page/MainPage.tsx
   const { ready, authenticated, login, logout } = usePrivy(); // ✅ Include logout
+=======
+  const [isConnected, setIsConnected] = useState(false); // Track connection status
+
+  // Initialize WalletConnect
+  const initializeWalletConnect = useCallback(() => {
+    const newConnector = new WalletConnect({
+      bridge: "https://bridge.walletconnect.org",
+      qrcodeModal: QRCodeModal,
+    });
+
+    if (!newConnector.connected) {
+      newConnector.createSession();
+    }
+
+    newConnector.on("connect", (error, payload) => {
+      if (error) {
+        console.error(error);
+      } else {
+        const { accounts } = payload.params[0];
+        console.log("Connected:", accounts[0]);
+        navigate("/home");
+        setIsConnected(true);
+        setShowDialog(false);
+      }
+    });
+
+    newConnector.on("disconnect", (error, payload) => {
+      if (error) {
+        console.error(error);
+      }
+      setIsConnected(false); // Update connection status
+    });
+  }, [navigate]);
+>>>>>>> 0de52c826f9514e22b0a4042c4533974ca8f2eb5:src/page/Mainpage.tsx
 
   const handleLogin = (type: string) => {
     console.log("Logging in as:", type);
-    navigate("/home");
+    if (type === "walletconnect") {
+      initializeWalletConnect();
+    } else {
+      navigate("/home");
+    }
     setShowDialog(false);
   };
+
+  function LoginButton() {
+    const { ready, authenticated, login } = usePrivy();
+    // Disable login when Privy is not ready or the user is already authenticated
+    const disableLogin = !ready || (ready && authenticated);
+
+    return (
+      <button className="neon-button" disabled={disableLogin} onClick={login}>
+        Log in with Privy
+      </button>
+    );
+  }
 
   const openDialog = () => {
     setShowDialog(true);
@@ -73,10 +129,10 @@ function MainPage() {
             )}
 
             <button
-              onClick={() => handleLogin("Type2")}
+              onClick={() => handleLogin("walletconnect")}
               className="block text-white mb-2"
             >
-              Login Type 2
+              WalletConnect
             </button>
             <button
               onClick={() => handleLogin("Type3")}
