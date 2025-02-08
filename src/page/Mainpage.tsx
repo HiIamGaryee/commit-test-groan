@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import { usePrivy } from "@privy-io/react-auth";
+import walletImg from "../assets/wallet-img.png";
 
 function MainPage() {
   const navigate = useNavigate();
@@ -96,25 +97,34 @@ function MainPage() {
             className="bg-gray-800 p-4 rounded-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-white text-lg mb-4">Choose Login Type</h2>
-            <button
-              onClick={() => handleLogin("Type1")}
-              className="block text-white mb-2"
-            >
-              Login Type 1
-            </button>
-            <button
-              onClick={() => handleLogin("walletconnect")}
-              className="block text-white mb-2"
-            >
-              WalletConnect
-            </button>
-            <button
-              onClick={() => handleLogin("Type3")}
-              className="block text-white"
-            >
-              Login Type 3
-            </button>
+            <h2 className="text-white text-lg mb-4">Connect Wallet Now</h2>
+            <div>
+              <img
+                src={walletImg}
+                alt="Wallet"
+                className="full-width-centered-image"
+              />
+            </div>
+            <div className="flex-col gap-4 flex">
+              <button
+                onClick={() => handleLogin("Type1")}
+                className="neon-button"
+              >
+                Login Type 1
+              </button>
+              <button
+                onClick={() => handleLogin("walletconnect")}
+                className="neon-button"
+              >
+                WalletConnect
+              </button>
+              <button
+                onClick={() => handleLogin("Type3")}
+                className="neon-button"
+              >
+                Login Type 3
+              </button>
+            </div>
           </div>
         </div>
       )}
