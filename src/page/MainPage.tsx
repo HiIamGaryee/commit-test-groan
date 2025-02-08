@@ -1,18 +1,13 @@
 import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-<<<<<<< HEAD:src/page/MainPage.tsx
-=======
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
->>>>>>> 0de52c826f9514e22b0a4042c4533974ca8f2eb5:src/page/Mainpage.tsx
 import { usePrivy } from "@privy-io/react-auth";
+import walletImg from "../assets/wallet-img.png";
 
 function MainPage() {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
-<<<<<<< HEAD:src/page/MainPage.tsx
-  const { ready, authenticated, login, logout } = usePrivy(); // ✅ Include logout
-=======
   const [isConnected, setIsConnected] = useState(false); // Track connection status
 
   // Initialize WalletConnect
@@ -45,7 +40,6 @@ function MainPage() {
       setIsConnected(false); // Update connection status
     });
   }, [navigate]);
->>>>>>> 0de52c826f9514e22b0a4042c4533974ca8f2eb5:src/page/Mainpage.tsx
 
   const handleLogin = (type: string) => {
     console.log("Logging in as:", type);
@@ -107,39 +101,34 @@ function MainPage() {
             className="bg-gray-800 p-4 rounded-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-white text-lg mb-4">Choose Login Type</h2>
-
-            {/* If already logged in, show Logout button instead */}
-            {authenticated ? (
+            <h2 className="text-white text-lg mb-4">Connect Wallet Now</h2>
+            <div>
+              <img
+                src={walletImg}
+                alt="Wallet"
+                className="full-width-centered-image"
+              />
+            </div>
+            <div className="flex-col gap-4 flex">
               <button
-                onClick={logout}
-                className="block text-red-400 mb-2 hover:text-red-300"
+                onClick={() => handleLogin("Type1")}
+                className="neon-button"
               >
-                Log out of Privy
+                Login Type 1
               </button>
-            ) : (
               <button
-                onClick={login}
-                disabled={!ready}
-                className={`block text-white mb-2 ${!ready ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                onClick={() => handleLogin("walletconnect")}
+                className="neon-button"
               >
-                Log in with Privy
+                WalletConnect
               </button>
-            )}
-
-            <button
-              onClick={() => handleLogin("walletconnect")}
-              className="block text-white mb-2"
-            >
-              WalletConnect
-            </button>
-            <button
-              onClick={() => handleLogin("Type3")}
-              className="block text-white"
-            >
-              Login Type 3
-            </button>
+              <button
+                onClick={() => handleLogin("Type3")}
+                className="neon-button"
+              >
+                Login Type 3
+              </button>
+            </div>
           </div>
         </div>
       )}
