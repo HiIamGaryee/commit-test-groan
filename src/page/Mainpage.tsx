@@ -1,13 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import WalletConnect from "@walletconnect/client";
+import QRCodeModal from "@walletconnect/qrcode-modal";
 
 function MainPage() {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
+  const [isConnected, setIsConnected] = useState(false); // Track connection status
+
+  // Initialize WalletConnect
+  const initializeWalletConnect = useCallback(() => {
+    const newConnector = new WalletConnect({
+      bridge: "https://bridge.walletconnect.org",
+      qrcodeModal: QRCodeModal,
+    });
+
+    if (!newConnector.connected) {
+      newConnector.createSession();
+    }
+
+    newConnector.on("connect", (error, payload) => {
+      if (error) {
+        console.error(error);
+      } else {
+        const { accounts } = payload.params[0];
+        console.log("Connected:", accounts[0]);
+        navigate("/home");
+        setIsConnected(true);
+        setShowDialog(false);
+      }
+    });
+
+    newConnector.on("disconnect", (error, payload) => {
+      if (error) {
+        console.error(error);
+      }
+      setIsConnected(false); // Update connection status
+    });
+  }, [navigate]);
 
   const handleLogin = (type: any) => {
     console.log("Logging in as:", type);
-    navigate("/home");
+    if (type === "walletconnect") {
+      initializeWalletConnect();
+    } else {
+      navigate("/home");
+    }
     setShowDialog(false);
   };
 
@@ -37,7 +75,7 @@ function MainPage() {
       </div>
       {showDialog && (
         <div
-          className="fixed inset-0 bg-neutral-950	 bg-opacity-50 flex justify-center items-center"
+          className="fixed inset-0 bg-neutral-950 bg-opacity-50 flex justify-center items-center"
           onClick={closeDialog}
         >
           <div
@@ -52,10 +90,10 @@ function MainPage() {
               Login Type 1
             </button>
             <button
-              onClick={() => handleLogin("Type2")}
+              onClick={() => handleLogin("walletconnect")}
               className="block text-white mb-2"
             >
-              Login Type 2
+              WalletConnect
             </button>
             <button
               onClick={() => handleLogin("Type3")}
