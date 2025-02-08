@@ -8,7 +8,10 @@ import walletImg from "../assets/wallet-img.png";
 function MainPage() {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
-  const [isConnected, setIsConnected] = useState(false); // Track connection status
+  const [isConnected, setIsConnected] = useState(false); // Track WalletConnect status
+
+  // Get Privy authentication state
+  const { ready, authenticated, login, logout } = usePrivy();
 
   // Initialize WalletConnect
   const initializeWalletConnect = useCallback(() => {
@@ -21,55 +24,43 @@ function MainPage() {
       newConnector.createSession();
     }
 
-    newConnector.on("connect", (error, payload) => {
+    newConnector.on("connect", (error: Error | null, payload: any) => {
       if (error) {
         console.error(error);
       } else {
-        const { accounts } = payload.params[0];
-        console.log("Connected:", accounts[0]);
-        navigate("/home");
+        console.log("Wallet connected:", payload);
         setIsConnected(true);
-        setShowDialog(false);
       }
     });
 
-    newConnector.on("disconnect", (error, payload) => {
+    newConnector.on("disconnect", (error: Error | null) => {
       if (error) {
         console.error(error);
       }
-      setIsConnected(false); // Update connection status
+      setIsConnected(false);
     });
-  }, [navigate]);
+  }, []);
 
+  // Handle Login/Logout Actions
   const handleLogin = (type: string) => {
     console.log("Logging in as:", type);
     if (type === "walletconnect") {
       initializeWalletConnect();
+    } else if (type === "privy") {
+      if (authenticated) {
+        logout(); // If already logged in, log out instead
+      } else {
+        login();
+      }
     } else {
       navigate("/home");
     }
     setShowDialog(false);
   };
 
-  function LoginButton() {
-    const { ready, authenticated, login } = usePrivy();
-    // Disable login when Privy is not ready or the user is already authenticated
-    const disableLogin = !ready || (ready && authenticated);
-
-    return (
-      <button className="neon-button" disabled={disableLogin} onClick={login}>
-        Log in with Privy
-      </button>
-    );
-  }
-
-  const openDialog = () => {
-    setShowDialog(true);
-  };
-
-  const closeDialog = () => {
-    setShowDialog(false);
-  };
+  // Open & Close Dialog
+  const openDialog = () => setShowDialog(true);
+  const closeDialog = () => setShowDialog(false);
 
   return (
     <div className="h-full bg-neutral-950">
@@ -111,10 +102,10 @@ function MainPage() {
             </div>
             <div className="flex-col gap-4 flex">
               <button
-                onClick={() => handleLogin("Type1")}
+                onClick={() => handleLogin("privy")}
                 className="neon-button"
               >
-                Login Type 1
+                {authenticated ? "Logout from Privy" : "Login with Privy"}
               </button>
               <button
                 onClick={() => handleLogin("walletconnect")}

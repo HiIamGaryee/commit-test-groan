@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./global.css";
 import HomePage from "./page/HomePage";
 import TransactionsPage from "./page/TransactionsPage"; // ✅ Import TransactionsPage
-import MainPage from "./page/Mainpage";
+import MainPage from "./page/MainPage";
 
 function App() {
   return (
