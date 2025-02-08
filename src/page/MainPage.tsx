@@ -5,7 +5,7 @@ import { usePrivy } from "@privy-io/react-auth";
 function MainPage() {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
-  const { ready, authenticated, login } = usePrivy();
+  const { ready, authenticated, login, logout } = usePrivy(); // ✅ Include logout
 
   const handleLogin = (type: string) => {
     console.log("Logging in as:", type);
@@ -53,15 +53,24 @@ function MainPage() {
           >
             <h2 className="text-white text-lg mb-4">Choose Login Type</h2>
 
-            {/* Replacing Login Type 1 with Privy */}
-            <button
-              onClick={login}
-              disabled={!ready || authenticated}
-              className={`block text-white mb-2 ${!ready || authenticated ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-            >
-              Log in with Privy
-            </button>
+            {/* If already logged in, show Logout button instead */}
+            {authenticated ? (
+              <button
+                onClick={logout}
+                className="block text-red-400 mb-2 hover:text-red-300"
+              >
+                Log out of Privy
+              </button>
+            ) : (
+              <button
+                onClick={login}
+                disabled={!ready}
+                className={`block text-white mb-2 ${!ready ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+              >
+                Log in with Privy
+              </button>
+            )}
 
             <button
               onClick={() => handleLogin("Type2")}
