@@ -3,8 +3,6 @@ import ReactDOM from "react-dom/client";
 import "./global.css";
 import { PrivyProvider } from "@privy-io/react-auth";
 import App from "./App";
-import { Buffer } from "buffer";
-window.Buffer = Buffer;
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -18,7 +16,7 @@ root.render(
         appearance: {
           theme: "light",
           accentColor: "#676FFF",
-          logo: "publiclogo192.png",
+          logo: "/logo192.png",
         },
         embeddedWallets: {
           createOnLogin: "users-without-wallets",

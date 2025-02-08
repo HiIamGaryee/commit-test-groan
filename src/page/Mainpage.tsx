@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import walletImg from "../assets/wallet-img.png";
+import { usePrivy } from "@privy-io/react-auth";
 
 function MainPage() {
   const navigate = useNavigate();
@@ -42,11 +43,7 @@ function MainPage() {
 
   const handleLogin = (type: any) => {
     console.log("Logging in as:", type);
-    if (type === "walletconnect") {
-      initializeWalletConnect();
-    } else {
-      navigate("/home");
-    }
+    navigate("/home");
     setShowDialog(false);
   };
 
@@ -58,9 +55,22 @@ function MainPage() {
     setShowDialog(false);
   };
 
+  function LoginButton() {
+    const { ready, authenticated, login } = usePrivy();
+    // Disable login when Privy is not ready or the user is already authenticated
+    const disableLogin = !ready || (ready && authenticated);
+
+    return (
+      <button className="neon-button" disabled={disableLogin} onClick={login}>
+        Log in with Privy
+      </button>
+    );
+  }
+
   return (
     <div className="h-full bg-neutral-950">
       <div className="bg-opacity-75 bg-neutral-950 fixed top-0 left-0 right-0 py-2 px-4 flex justify-start items-center">
+        {LoginButton()}
         <button onClick={openDialog} className="neon-button">
           Connect Wallet
         </button>
@@ -76,7 +86,7 @@ function MainPage() {
       </div>
       {showDialog && (
         <div
-          className="fixed inset-0 bg-neutral-950 bg-opacity-50 flex justify-center items-center"
+          className="fixed inset-0 bg-neutral-950	 bg-opacity-50 flex justify-center items-center"
           onClick={closeDialog}
         >
           <div
