@@ -1,9 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./global.css";
-import MainPage from "./page/MainPage";
 import HomePage from "./page/HomePage";
 import TransactionsPage from "./page/TransactionsPage"; // ✅ Import TransactionsPage
+import MainPage from "./page/Mainpage";
 
 function App() {
   return (
@@ -11,14 +11,14 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/transactions" element={<TransactionsPage />} /> {/* ✅ Add Transactions Page */}
+        <Route path="/transactions" element={<TransactionsPage />} />{" "}
+        {/* ✅ Add Transactions Page */}
       </Routes>
     </Router>
   );
 }
 
 export default App;
-
 
 // function App() {
 // return (
@@ -43,4 +43,3 @@ export default App;
 //   </div>
 // );
 // }
-
