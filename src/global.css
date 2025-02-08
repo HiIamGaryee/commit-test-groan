@@ -82,6 +82,14 @@
       transform: rotate(360deg);
     }
   }
+
+  .full-width-centered-image {
+    display: block;        
+    max-width: 80%;    
+    height: auto;          
+    margin: 0 auto; 
+    margin-bottom: 20px;      
+  }
   
 /* 
 body {

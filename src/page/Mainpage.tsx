@@ -2,11 +2,12 @@ import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
+import walletImg from "../assets/wallet-img.png";
 
 function MainPage() {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
-  const [isConnected, setIsConnected] = useState(false); // Track connection status
+  const [isConnected, setIsConnected] = useState(false);
 
   // Initialize WalletConnect
   const initializeWalletConnect = useCallback(() => {
@@ -83,24 +84,34 @@ function MainPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-white text-lg mb-4">Choose Login Type</h2>
-            <button
-              onClick={() => handleLogin("Type1")}
-              className="block text-white mb-2"
-            >
-              Login Type 1
-            </button>
-            <button
-              onClick={() => handleLogin("walletconnect")}
-              className="block text-white mb-2"
-            >
-              WalletConnect
-            </button>
-            <button
-              onClick={() => handleLogin("Type3")}
-              className="block text-white"
-            >
-              Login Type 3
-            </button>
+
+            <div>
+              <img
+                src={walletImg}
+                alt="Wallet"
+                className="full-width-centered-image"
+              />
+            </div>
+            <div className="flex-col gap-4 flex">
+              <button
+                onClick={() => handleLogin("Type1")}
+                className="neon-button"
+              >
+                Login Type 1
+              </button>
+              <button
+                onClick={() => handleLogin("walletconnect")}
+                className="neon-button"
+              >
+                WalletConnect
+              </button>
+              <button
+                onClick={() => handleLogin("Type3")}
+                className="neon-button"
+              >
+                Login Type 3
+              </button>
+            </div>
           </div>
         </div>
       )}
