@@ -5,8 +5,12 @@
   "dependencies": {
     "@chatscope/chat-ui-kit-react": "^2.0.3",
     "@privy-io/react-auth": "^2.4.0",
+    "@walletconnect/client": "^1.8.0",
+    "@walletconnect/qrcode-modal": "^1.8.0",
+    "@walletconnect/web3-provider": "^1.8.0",
     "ajv": "^8.17.1",
     "axios": "^1.7.9",
+    "buffer": "^6.0.3",
     "cra-template-typescript": "1.2.0",
     "openai": "^4.83.0",
     "react": "^18.2.0",
