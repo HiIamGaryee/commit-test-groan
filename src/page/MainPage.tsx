@@ -76,20 +76,27 @@ function MainPage() {
 
   // Handle Login/Logout Actions
   const handleLogin = (type: string) => {
-    console.log("Logging in as:", type);
+    console.log("Logging in as:", type)
     if (type === "walletconnect") {
-      initializeWalletConnect();
+      initializeWalletConnect()
     } else if (type === "privy") {
       if (authenticated) {
-        logout(); // If already logged in, log out instead
+        logout()
       } else {
-        login();
+        login()
+      }
+    } else if (type === "coinbase") {
+      if (isCoinbaseConnected) {
+        // Implement disconnect logic here
+        setIsCoinbaseConnected(false)
+      } else {
+        initializeCoinbaseWallet()
       }
     } else {
-      navigate("/home");
+      navigate("/home")
     }
-    setShowDialog(false);
-  };
+    setShowDialog(false)
+  }
 
   // Open & Close Dialog
   const openDialog = () => setShowDialog(true);
