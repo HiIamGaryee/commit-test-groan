@@ -1,17 +1,15 @@
 import React, { useEffect, useState, ReactElement } from "react";
 import { FaUserCircle, FaBell, FaGlobe, FaPlus, FaExchangeAlt, FaArrowUp, FaArrowDown, FaSignOutAlt } from "react-icons/fa";
-import { AiOutlinePieChart, AiOutlineFileText, AiOutlineSetting } from "react-icons/ai";
+import {
+  AiOutlinePieChart,
+  AiOutlineFileText,
+  AiOutlineSetting,
+} from "react-icons/ai";
 import { usePrivy } from "@privy-io/react-auth";
 import { useNavigate } from "react-router-dom";
-import TransactionsPage, { mockData } from "./TransactionsPage"; // ✅ Import mock transactions
 
-// ✅ Mock AI-Generated Smart Report Data
-const MOCK_REPORT = {
-  overallHealthScore: 75,
-  suspiciousFindings: ["Unusual gas fees detected", "Large transaction to unknown contract"],
-  securityTips: ["Consider using a hardware wallet", "Enable two-factor authentication"],
-  aiInsights: ["Your wallet has interacted with a high-risk contract."]
-};
+const GRAPH_API_URL = "https://github.com/HiIamGaryee/commit-test-groan-graph";
+const AI_REPORT_API_URL = "http://localhost:5000/generate-report";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -38,15 +36,44 @@ const HomePage: React.FC = () => {
   }, [navigate]);
 
   useEffect(() => {
-    setReportLoading(true);
+    const fetchData = async () => {
+      if (!walletAddress) return;
 
-    // ✅ Simulating API delay for a realistic UI experience
-    setTimeout(() => {
-      console.log("✅ Smart Report Loaded from Mock Data:", MOCK_REPORT);
-      setSmartReport(MOCK_REPORT);
-      setReportLoading(false);
-    }, 2000);
-  }, []);
+      try {
+        // Fetch transactions from The Graph
+        const query = {
+          query: `{ wallet(id: "${walletAddress}") { transactions { id from to value timestamp } } }`,
+        };
+        const response = await axios.post(GRAPH_API_URL, query);
+        const walletData = response.data?.data?.wallet;
+
+        if (!walletData || !walletData.transactions.length) {
+          throw new Error("No transactions found.");
+        }
+
+        setTransactions(walletData.transactions);
+      } catch (error) {
+        console.error("Transaction API Error:", error);
+      }
+
+      try {
+        // Fetch AI-generated Smart Report
+        setReportLoading(true);
+        const reportResponse = await axios.post(AI_REPORT_API_URL, { walletAddress });
+        setSmartReport(reportResponse.data.report);
+      } catch (error) {
+        console.error("AI Report API Error:", error);
+        setReportError(true);
+        setSmartReport("Error generating report.");
+      } finally {
+        setReportLoading(false);
+      }
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [walletAddress]);
 
   /** Logout Function */
   const handleLogout = () => {
@@ -75,7 +102,10 @@ const HomePage: React.FC = () => {
           <FaGlobe size={20} />
           <FaBell size={20} />
           {isAuthenticated && (
-            <button onClick={handleLogout} className="neon-button bg-red-600 hover:bg-red-700 px-4 py-1 rounded">
+            <button
+              onClick={handleLogout}
+              className="neon-button bg-red-600 hover:bg-red-700 px-4 py-1 rounded"
+            >
               <FaSignOutAlt size={16} className="inline-block mr-1" />
               Logout
             </button>
@@ -143,14 +173,27 @@ const HomePage: React.FC = () => {
       {/* Bottom Navigation */}
       <div className="flex justify-around py-4 border-t border-gray-700 bg-gray-800 text-gray-400">
         <BottomNavButton icon={<AiOutlinePieChart size={24} />} text="Assets" />
-        <BottomNavButton icon={<AiOutlineFileText size={24} />} text="Transactions" />
-        <BottomNavButton icon={<AiOutlineSetting size={24} />} text="Settings" />
+        <BottomNavButton
+          icon={<AiOutlineFileText size={24} />}
+          text="Transactions"
+        />
+        <BottomNavButton
+          icon={<AiOutlineSetting size={24} />}
+          text="Settings"
+        />
       </div>
     </div>
   );
 };
 
 /** Fixing missing components */
+const ActionButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
+  <div className="flex flex-col items-center text-gray-300 hover:text-white">
+    <div className="bg-gray-700 p-3 rounded-full">{icon}</div>
+    <span className="mt-1 text-sm">{text}</span>
+  </div>
+);
+
 const BottomNavButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
   <div className="flex flex-col items-center hover:text-white">
     {icon}
