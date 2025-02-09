@@ -17,6 +17,8 @@ import {
 import { usePrivy } from "@privy-io/react-auth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AiBot from "../components/AiBot";
+import TailwindDialog from "../components/TailwindDialog";
 
 const GRAPH_API_URL = "https://thegraph.com/studio/subgraph/committestgroan/";
 const AI_REPORT_API_URL = "http://localhost:5000/generate-report";
@@ -32,6 +34,10 @@ const HomePage: React.FC = () => {
   const [loginMethod, setLoginMethod] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [reportLoading, setReportLoading] = useState(true);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
 
   /** Retrieve Login Method & Wallet Address from LocalStorage */
   useEffect(() => {
@@ -121,6 +127,9 @@ const HomePage: React.FC = () => {
           </span>
         </div>
         <div className="flex gap-4 items-center">
+          <button onClick={handleOpen} className="neon-button bg-purple-600 hover:bg-purple-700 px-4 py-1 rounded">
+            Open AiBot
+          </button>
           <FaGlobe size={20} />
           <FaBell size={20} />
           {isAuthenticated && (
@@ -133,6 +142,10 @@ const HomePage: React.FC = () => {
             </button>
           )}
         </div>
+
+        <TailwindDialog open={isOpen} onClose={handleClose}>
+          <AiBot onClose={handleClose} />
+        </TailwindDialog>
       </div>
 
       {/* Balance Section */}
