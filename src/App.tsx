@@ -11,8 +11,6 @@ function App() {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/transactions" element={<TransactionsPage />} />{" "}
-        {/* ✅ Add Transactions Page */}
       </Routes>
     </Router>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
@@ -9,11 +9,20 @@ import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
 function MainPage() {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
-  const [isConnected, setIsConnected] = useState(false); // Track WalletConnect status
+  const [isConnected, setIsConnected] = useState(false);
   const [isCoinbaseConnected, setIsCoinbaseConnected] = useState(false);
 
   // Get Privy authentication state
-  const { ready, authenticated, login, logout } = usePrivy();
+  const { ready, authenticated, user, login, logout } = usePrivy();
+
+  // Check if user is authenticated and redirect to /home
+  useEffect(() => {
+    if (authenticated && user?.wallet?.address) {
+      localStorage.setItem("loginMethod", "Privy");
+      localStorage.setItem("walletAddress", user.wallet.address);
+      navigate("/home");
+    }
+  }, [authenticated, user, navigate]);
 
   // Initialize WalletConnect
   const initializeWalletConnect = useCallback(() => {
@@ -32,6 +41,9 @@ function MainPage() {
       } else {
         console.log("Wallet connected:", payload);
         setIsConnected(true);
+        localStorage.setItem("loginMethod", "WalletConnect");
+        localStorage.setItem("walletAddress", "0xWalletConnectAddress"); // Update dynamically
+        navigate("/home");
       }
     });
 
@@ -41,7 +53,7 @@ function MainPage() {
       }
       setIsConnected(false);
     });
-  }, []);
+  }, [navigate]);
 
   // Initialize Coinbase Wallet
   const initializeCoinbaseWallet = useCallback(() => {
@@ -63,6 +75,9 @@ function MainPage() {
           const walletAccounts = accounts as string[];
           console.log("Coinbase Wallet connected:", walletAccounts[0]);
           setIsCoinbaseConnected(true);
+          localStorage.setItem("loginMethod", "Coinbase");
+          localStorage.setItem("walletAddress", walletAccounts[0]);
+          navigate("/home");
         })
         .catch((error) => {
           console.error("Failed to connect Coinbase Wallet:", error);
@@ -72,28 +87,23 @@ function MainPage() {
       console.error("Failed to initialize Coinbase Wallet:", error);
       setIsCoinbaseConnected(false);
     }
-  }, []);
+  }, [navigate]);
 
-  // Handle Login/Logout Actions
-  const handleLogin = (type: string) => {
+  // Handle Login Actions
+  const handleLogin = async (type: string) => {
     console.log("Logging in as:", type);
     if (type === "walletconnect") {
       initializeWalletConnect();
     } else if (type === "privy") {
       if (authenticated) {
         logout();
+        localStorage.removeItem("loginMethod");
+        localStorage.removeItem("walletAddress");
       } else {
-        login();
+        await login();
       }
     } else if (type === "coinbase") {
-      if (isCoinbaseConnected) {
-        // Implement disconnect logic here
-        setIsCoinbaseConnected(false);
-      } else {
-        initializeCoinbaseWallet();
-      }
-    } else {
-      navigate("/home");
+      initializeCoinbaseWallet();
     }
     setShowDialog(false);
   };
@@ -114,9 +124,7 @@ function MainPage() {
       {/* Page Content */}
       <div className="bg-home text-white min-h-screen p-4 flex items-center justify-center">
         <div className="container text-center">
-          <h1 className="text-6xl" style={{ fontFamily: "Anton, sans-serif" }}>
-            Wallet Analytics Platform
-          </h1>
+          <h1 className="text-6xl">Wallet Analytics Platform</h1>
           <p className="text-2xl mt-2">
             Log in with your wallet to access and visualize your transaction
             history with detailed graphs.
