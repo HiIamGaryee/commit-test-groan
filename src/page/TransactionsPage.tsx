@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-const mockData = {
+export const mockData = {
     data: {
         transfers: [
             {
@@ -22,7 +22,7 @@ const mockData = {
 };
 
 const TransactionsPage: React.FC = () => {
-    const [transactions, setTransactions] = useState(mockData.data.transfers);
+    const [transactions, setTransactions] = useState<{ id: string, from: string, to: string, value: string, timestamp: string }[]>(mockData.data.transfers);
 
     // Function to format timestamp
     const formatDate = (timestamp: string) => {
@@ -46,7 +46,7 @@ const TransactionsPage: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {transactions.map((tx, index) => (
+                            {transactions.map((tx: { id: string, from: string, to: string, value: string, timestamp: string }, index: number) => (
                                 <tr key={index} className="border-b border-gray-700">
                                     <td className="p-2 text-blue-400 truncate">{tx.id}</td>
                                     <td className="p-2 text-red-400 truncate">{tx.from}</td>
