@@ -1,93 +1,71 @@
 import React, { useEffect, useState, ReactElement } from "react";
-import { FaUserCircle, FaBell, FaGlobe, FaPlus, FaExchangeAlt, FaArrowUp, FaArrowDown, FaSignOutAlt } from "react-icons/fa";
-import {
-  AiOutlinePieChart,
-  AiOutlineFileText,
-  AiOutlineSetting,
-} from "react-icons/ai";
+import { FaUserCircle, FaBell, FaGlobe, FaSignOutAlt } from "react-icons/fa";
 import { usePrivy } from "@privy-io/react-auth";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import TransactionsPage, { mockData } from "./TransactionsPage";
 
-const GRAPH_API_URL = "https://github.com/HiIamGaryee/commit-test-groan-graph";
 const AI_REPORT_API_URL = "http://localhost:5000/generate-report";
+
+// Mock Report Data for UI Testing
+const MOCK_REPORT = {
+  overallHealthScore: 75,
+  suspiciousFindings: [
+    { text: "Unusual gas fees detected", level: "warning" },
+    { text: "Large transaction to unknown contract", level: "critical" }
+  ],
+  securityTips: [
+    "Consider using a hardware wallet",
+    "Enable two-factor authentication"
+  ],
+  aiInsights: ["Your wallet has interacted with a high-risk contract."]
+};
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { authenticated, logout } = usePrivy();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [smartReport, setSmartReport] = useState(MOCK_REPORT); // ✅ Default mock report
-  const [loading, setLoading] = useState(true);
-  const [loginMethod, setLoginMethod] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState(mockData.data.transfers);
+  const [smartReport, setSmartReport] = useState(MOCK_REPORT);
+  const [reportError, setReportError] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [reportLoading, setReportLoading] = useState(true);
 
-  /** Retrieve Login Method & Wallet Address from LocalStorage */
   useEffect(() => {
-    const storedLoginMethod = localStorage.getItem("loginMethod");
     const storedWalletAddress = localStorage.getItem("walletAddress");
-
-    if (storedLoginMethod && storedWalletAddress) {
-      setLoginMethod(storedLoginMethod);
+    if (storedWalletAddress) {
       setWalletAddress(storedWalletAddress);
       setIsAuthenticated(true);
     } else {
-      navigate("/"); // Redirect back to login if no valid session
+      navigate("/");
     }
   }, [navigate]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!walletAddress) return;
-
+    const fetchReport = async () => {
       try {
-        // Fetch transactions from The Graph
-        const query = {
-          query: `{ wallet(id: "${walletAddress}") { transactions { id from to value timestamp } } }`,
-        };
-        const response = await axios.post(GRAPH_API_URL, query);
-        const walletData = response.data?.data?.wallet;
-
-        if (!walletData || !walletData.transactions.length) {
-          throw new Error("No transactions found.");
-        }
-
-        setTransactions(walletData.transactions);
-      } catch (error) {
-        console.error("Transaction API Error:", error);
-      }
-
-      try {
-        // Fetch AI-generated Smart Report
         setReportLoading(true);
-        const reportResponse = await axios.post(AI_REPORT_API_URL, { walletAddress });
+        const reportResponse = await axios.post(AI_REPORT_API_URL, {
+          walletAddress,
+          transactions,
+        });
         setSmartReport(reportResponse.data.report);
       } catch (error) {
         console.error("AI Report API Error:", error);
         setReportError(true);
-        setSmartReport("Error generating report.");
+        setSmartReport(MOCK_REPORT);
       } finally {
         setReportLoading(false);
       }
-
-      setLoading(false);
     };
 
-    fetchData();
+    fetchReport();
   }, [walletAddress]);
 
-  /** Logout Function */
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setLoginMethod(null);
-    setWalletAddress(null);
-    localStorage.removeItem("loginMethod");
     localStorage.removeItem("walletAddress");
-
-    if (loginMethod === "Privy") {
-      logout().then(() => navigate("/"));
-    } else {
-      navigate("/");
-    }
+    logout().then(() => navigate("/"));
   };
 
   return (
@@ -102,10 +80,7 @@ const HomePage: React.FC = () => {
           <FaGlobe size={20} />
           <FaBell size={20} />
           {isAuthenticated && (
-            <button
-              onClick={handleLogout}
-              className="neon-button bg-red-600 hover:bg-red-700 px-4 py-1 rounded"
-            >
+            <button onClick={handleLogout} className="neon-button bg-red-600 hover:bg-red-700 px-4 py-1 rounded">
               <FaSignOutAlt size={16} className="inline-block mr-1" />
               Logout
             </button>
@@ -113,92 +88,82 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Smart Report Section */}
+      {/* Smart Report Section - Modified UI */}
       {isAuthenticated && (
-        <div className="p-6 bg-gray-800 rounded-lg">
-          <h2 className="text-2xl font-semibold mb-3">Smart Report</h2>
+        <div className="p-6 bg-gray-900 rounded-lg shadow-md mt-6 mx-6">
+          <h2 className="text-2xl font-semibold mb-3 text-white">Smart Report</h2>
+
           {reportLoading ? (
             <div className="flex justify-center items-center h-24">
               <div className="loader"></div>
             </div>
           ) : (
-            <div className="p-4 bg-gray-700 rounded-md">
-              <h3 className="text-xl font-semibold text-blue-400">Overall Health Score</h3>
-              <p className="text-lg font-bold text-white mt-1">{smartReport.overallHealthScore} / 100</p>
+            <div className="bg-gray-800 p-5 rounded-lg shadow-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-              {/* Suspicious Findings */}
-              {smartReport.suspiciousFindings.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold text-yellow-400">⚠️Suspicious Findings⚠️</h3>
-                  <ul className="list-disc ml-5 text-red-300">
-                    {smartReport.suspiciousFindings.map((finding, index) => (
-                      <li key={index}>{finding}</li>
-                    ))}
-                  </ul>
+                {/* Overall Health Score */}
+                <div className="p-4 border border-gray-600 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-300">Overall Health Score</h3>
+                  <p className={`text-3xl font-bold mt-2 ${smartReport.overallHealthScore > 70 ? "text-green-400" : "text-yellow-400"
+                    }`}>
+                    {smartReport.overallHealthScore} / 100
+                  </p>
                 </div>
-              )}
 
-              {/* Security Tips */}
-              {smartReport.securityTips.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold text-green-400">Security Tips</h3>
-                  <ul className="list-disc ml-5 text-green-300">
-                    {smartReport.securityTips.map((tip, index) => (
-                      <li key={index}>{tip}</li>
-                    ))}
-                  </ul>
+                {/* Suspicious Findings */}
+                <div className="p-4 border border-gray-600 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-300">Suspicious Findings</h3>
+                  {smartReport.suspiciousFindings.length > 0 ? (
+                    <ul className="list-disc ml-5 text-gray-300">
+                      {smartReport.suspiciousFindings.map((finding, index) => (
+                        <li key={index} className={`${finding.level === "critical" ? "text-red-400 font-bold" : "text-yellow-300"
+                          }`}>
+                          {finding.text}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-400">No suspicious activity detected.</p>
+                  )}
                 </div>
-              )}
 
-              {/* AI Insights */}
-              {smartReport.aiInsights.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="text-lg font-semibold text-blue-400">AI Insights</h3>
-                  <p className="text-gray-300 italic">{smartReport.aiInsights[0]}</p>
+                {/* Security Tips */}
+                <div className="p-4 border border-gray-600 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-300">Security Tips</h3>
+                  {smartReport.securityTips.length > 0 ? (
+                    <ul className="list-disc ml-5 text-green-300">
+                      {smartReport.securityTips.map((tip, index) => (
+                        <li key={index}>{tip}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-400">No additional security recommendations.</p>
+                  )}
                 </div>
-              )}
+
+                {/* AI Insights */}
+                <div className="p-4 border border-gray-600 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-300">AI Insights</h3>
+                  {smartReport.aiInsights.length > 0 ? (
+                    <p className="text-gray-300">{smartReport.aiInsights[0]}</p>
+                  ) : (
+                    <p className="text-gray-400">No AI insights available.</p>
+                  )}
+                </div>
+
+              </div>
             </div>
           )}
         </div>
       )}
 
       {/* Transactions Section */}
-      {isAuthenticated && (
-        <div className="p-4">
-          <h2 className="text-2xl font-semibold mb-2">Recent Transactions</h2>
-          <TransactionsPage />
-        </div>
-      )}
-
-      {/* Bottom Navigation */}
-      <div className="flex justify-around py-4 border-t border-gray-700 bg-gray-800 text-gray-400">
-        <BottomNavButton icon={<AiOutlinePieChart size={24} />} text="Assets" />
-        <BottomNavButton
-          icon={<AiOutlineFileText size={24} />}
-          text="Transactions"
-        />
-        <BottomNavButton
-          icon={<AiOutlineSetting size={24} />}
-          text="Settings"
-        />
+      <div className="p-6">
+        <h2 className="text-2xl font-semibold mb-2">Recent Transactions</h2>
+        <TransactionsPage />
       </div>
     </div>
   );
 };
-
-/** Fixing missing components */
-const ActionButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
-  <div className="flex flex-col items-center text-gray-300 hover:text-white">
-    <div className="bg-gray-700 p-3 rounded-full">{icon}</div>
-    <span className="mt-1 text-sm">{text}</span>
-  </div>
-);
-
-const BottomNavButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
-  <div className="flex flex-col items-center hover:text-white">
-    {icon}
-    <span className="text-xs mt-1">{text}</span>
-  </div>
-);
 
 export default HomePage;
