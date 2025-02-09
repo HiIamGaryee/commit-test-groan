@@ -4,13 +4,13 @@ import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import { usePrivy } from "@privy-io/react-auth";
 import walletImg from "../assets/wallet-img.png";
-import CoinbaseWalletSDK from "@coinbase/wallet-sdk"
+import CoinbaseWalletSDK from "@coinbase/wallet-sdk";
 
 function MainPage() {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
   const [isConnected, setIsConnected] = useState(false); // Track WalletConnect status
-  const [isCoinbaseConnected, setIsCoinbaseConnected] = useState(false)
+  const [isCoinbaseConnected, setIsCoinbaseConnected] = useState(false);
 
   // Get Privy authentication state
   const { ready, authenticated, login, logout } = usePrivy();
@@ -49,54 +49,54 @@ function MainPage() {
       const coinbaseWallet = new CoinbaseWalletSDK({
         appName: "Your App Name",
         appLogoUrl: "https://example.com/logo.png",
-      })
+      });
 
       const ethereum = coinbaseWallet.makeWeb3Provider({
         jsonRpcUrl: "https://ethereum-rpc.publicnode.com",
-        chainId: 1, // Mainnet
+        chainId: 1,
         options: "all",
-      })
+      } as any);
 
       ethereum
         .request({ method: "eth_requestAccounts" })
         .then((accounts) => {
-          const walletAccounts = accounts as string[]
-          console.log("Coinbase Wallet connected:", walletAccounts[0])
-          setIsCoinbaseConnected(true)
+          const walletAccounts = accounts as string[];
+          console.log("Coinbase Wallet connected:", walletAccounts[0]);
+          setIsCoinbaseConnected(true);
         })
         .catch((error) => {
-          console.error("Failed to connect Coinbase Wallet:", error)
-          setIsCoinbaseConnected(false)
-        })
+          console.error("Failed to connect Coinbase Wallet:", error);
+          setIsCoinbaseConnected(false);
+        });
     } catch (error) {
-      console.error("Failed to initialize Coinbase Wallet:", error)
-      setIsCoinbaseConnected(false)
+      console.error("Failed to initialize Coinbase Wallet:", error);
+      setIsCoinbaseConnected(false);
     }
-  }, [])
+  }, []);
 
   // Handle Login/Logout Actions
   const handleLogin = (type: string) => {
-    console.log("Logging in as:", type)
+    console.log("Logging in as:", type);
     if (type === "walletconnect") {
-      initializeWalletConnect()
+      initializeWalletConnect();
     } else if (type === "privy") {
       if (authenticated) {
-        logout()
+        logout();
       } else {
-        login()
+        login();
       }
     } else if (type === "coinbase") {
       if (isCoinbaseConnected) {
         // Implement disconnect logic here
-        setIsCoinbaseConnected(false)
+        setIsCoinbaseConnected(false);
       } else {
-        initializeCoinbaseWallet()
+        initializeCoinbaseWallet();
       }
     } else {
-      navigate("/home")
+      navigate("/home");
     }
-    setShowDialog(false)
-  }
+    setShowDialog(false);
+  };
 
   // Open & Close Dialog
   const openDialog = () => setShowDialog(true);
