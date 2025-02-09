@@ -91,6 +91,11 @@
     margin-bottom: 20px;      
   }
   
+  .bg-home {
+    @apply bg-cover bg-center bg-no-repeat;
+    background-image: url("/src/assets/bg-home.jpg");
+  }
+  
 /* 
 body {
   margin: 0;
