@@ -9,12 +9,16 @@ import {
   FaArrowDown,
   FaSignOutAlt,
 } from "react-icons/fa";
-import { AiOutlinePieChart, AiOutlineFileText, AiOutlineSetting } from "react-icons/ai";
+import {
+  AiOutlinePieChart,
+  AiOutlineFileText,
+  AiOutlineSetting,
+} from "react-icons/ai";
 import { usePrivy } from "@privy-io/react-auth";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const GRAPH_API_URL = "https://github.com/HiIamGaryee/commit-test-groan-graph";
+const GRAPH_API_URL = "https://thegraph.com/studio/subgraph/committestgroan/";
 const AI_REPORT_API_URL = "http://localhost:5000/generate-report";
 
 const HomePage: React.FC = () => {
@@ -67,7 +71,9 @@ const HomePage: React.FC = () => {
       try {
         // Fetch AI-generated Smart Report
         setReportLoading(true);
-        const reportResponse = await axios.post(AI_REPORT_API_URL, { walletAddress });
+        const reportResponse = await axios.post(AI_REPORT_API_URL, {
+          walletAddress,
+        });
         setSmartReport(reportResponse.data.report);
       } catch (error) {
         console.error("AI Report API Error:", error);
@@ -118,7 +124,10 @@ const HomePage: React.FC = () => {
           <FaGlobe size={20} />
           <FaBell size={20} />
           {isAuthenticated && (
-            <button onClick={handleLogout} className="neon-button bg-red-600 hover:bg-red-700 px-4 py-1 rounded">
+            <button
+              onClick={handleLogout}
+              className="neon-button bg-red-600 hover:bg-red-700 px-4 py-1 rounded"
+            >
               <FaSignOutAlt size={16} className="inline-block mr-1" />
               Logout
             </button>
@@ -185,8 +194,14 @@ const HomePage: React.FC = () => {
       {/* Bottom Navigation */}
       <div className="flex justify-around py-4 border-t border-gray-700 bg-gray-800 text-gray-400">
         <BottomNavButton icon={<AiOutlinePieChart size={24} />} text="Assets" />
-        <BottomNavButton icon={<AiOutlineFileText size={24} />} text="Transactions" />
-        <BottomNavButton icon={<AiOutlineSetting size={24} />} text="Settings" />
+        <BottomNavButton
+          icon={<AiOutlineFileText size={24} />}
+          text="Transactions"
+        />
+        <BottomNavButton
+          icon={<AiOutlineSetting size={24} />}
+          text="Settings"
+        />
       </div>
     </div>
   );
@@ -200,7 +215,13 @@ const ActionButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
   </div>
 );
 
-const BottomNavButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
+const BottomNavButton = ({
+  icon,
+  text,
+}: {
+  icon: ReactElement;
+  text: string;
+}) => (
   <div className="flex flex-col items-center hover:text-white">
     {icon}
     <span className="text-xs mt-1">{text}</span>
