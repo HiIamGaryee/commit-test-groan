@@ -161,7 +161,9 @@ function MainPage() {
                 onClick={() => handleLogin("walletconnect")}
                 className="neon-button"
               >
-                WalletConnect
+                {authenticated
+                  ? "Logout from WalletConnect"
+                  : "Login with WalletConnect"}
               </button>
               <button
                 onClick={() => handleLogin("coinbase")}
