@@ -6,13 +6,19 @@ import App from "./App";
 import { Buffer } from "buffer";
 window.Buffer = Buffer;
 
+const PRIVY_APP_ID = process.env.REACT_APP_PRIVY_APP_ID;
+
+if (!PRIVY_APP_ID) {
+  console.error("PRIVY_APP_ID is missing. Check your .env file.");
+}
+
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
     <PrivyProvider
-      appId="cm6siyi0j000jy3mmu51xi48a"
+      appId={PRIVY_APP_ID || ""}
       config={{
         loginMethods: ["email", "wallet"],
         appearance: {

@@ -1,30 +1,24 @@
 import React, { useEffect, useState, ReactElement } from "react";
-import {
-  FaUserCircle,
-  FaBell,
-  FaGlobe,
-  FaPlus,
-  FaExchangeAlt,
-  FaArrowUp,
-  FaArrowDown,
-  FaSignOutAlt,
-} from "react-icons/fa";
+import { FaUserCircle, FaBell, FaGlobe, FaPlus, FaExchangeAlt, FaArrowUp, FaArrowDown, FaSignOutAlt } from "react-icons/fa";
 import { AiOutlinePieChart, AiOutlineFileText, AiOutlineSetting } from "react-icons/ai";
 import { usePrivy } from "@privy-io/react-auth";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import TransactionsPage, { mockData } from "./TransactionsPage"; // ✅ Import mock transactions
 
-const GRAPH_API_URL = "https://github.com/HiIamGaryee/commit-test-groan-graph";
-const AI_REPORT_API_URL = "http://localhost:5000/generate-report";
+// ✅ Mock AI-Generated Smart Report Data
+const MOCK_REPORT = {
+  overallHealthScore: 75,
+  suspiciousFindings: ["Unusual gas fees detected", "Large transaction to unknown contract"],
+  securityTips: ["Consider using a hardware wallet", "Enable two-factor authentication"],
+  aiInsights: ["Your wallet has interacted with a high-risk contract."]
+};
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { authenticated, logout } = usePrivy();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [smartReport, setSmartReport] = useState<string>("Loading report...");
+  const [smartReport, setSmartReport] = useState(MOCK_REPORT); // ✅ Default mock report
   const [loading, setLoading] = useState(true);
-  const [reportError, setReportError] = useState(false);
   const [loginMethod, setLoginMethod] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [reportLoading, setReportLoading] = useState(true);
@@ -44,61 +38,26 @@ const HomePage: React.FC = () => {
   }, [navigate]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!walletAddress) return;
+    setReportLoading(true);
 
-      try {
-        // Fetch transactions from The Graph
-        const query = {
-          query: `{ wallet(id: "${walletAddress}") { transactions { id from to value timestamp } } }`,
-        };
-        const response = await axios.post(GRAPH_API_URL, query);
-        const walletData = response.data?.data?.wallet;
-
-        if (!walletData || !walletData.transactions.length) {
-          throw new Error("No transactions found.");
-        }
-
-        setTransactions(walletData.transactions);
-      } catch (error) {
-        console.error("Transaction API Error:", error);
-      }
-
-      try {
-        // Fetch AI-generated Smart Report
-        setReportLoading(true);
-        const reportResponse = await axios.post(AI_REPORT_API_URL, { walletAddress });
-        setSmartReport(reportResponse.data.report);
-      } catch (error) {
-        console.error("AI Report API Error:", error);
-        setReportError(true);
-        setSmartReport("Error generating report.");
-      } finally {
-        setReportLoading(false);
-      }
-
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [walletAddress]);
+    // ✅ Simulating API delay for a realistic UI experience
+    setTimeout(() => {
+      console.log("✅ Smart Report Loaded from Mock Data:", MOCK_REPORT);
+      setSmartReport(MOCK_REPORT);
+      setReportLoading(false);
+    }, 2000);
+  }, []);
 
   /** Logout Function */
   const handleLogout = () => {
-    // Clear authentication state
     setIsAuthenticated(false);
     setLoginMethod(null);
     setWalletAddress(null);
-
-    // Clear stored session
     localStorage.removeItem("loginMethod");
     localStorage.removeItem("walletAddress");
 
-    // If logged in with Privy, log out properly
     if (loginMethod === "Privy") {
-      logout().then(() => {
-        navigate("/"); // Ensure redirect happens after logout is completed
-      });
+      logout().then(() => navigate("/"));
     } else {
       navigate("/");
     }
@@ -110,9 +69,7 @@ const HomePage: React.FC = () => {
       <div className="flex justify-between items-center p-4 border-b border-gray-700">
         <div className="flex items-center gap-2">
           <FaUserCircle size={28} />
-          <span className="text-lg font-semibold">
-            {walletAddress || "Not Connected"}
-          </span>
+          <span className="text-lg font-semibold">{walletAddress || "Not Connected"}</span>
         </div>
         <div className="flex gap-4 items-center">
           <FaGlobe size={20} />
@@ -126,30 +83,50 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Balance Section */}
-      <div className="text-center py-6 border-b border-gray-700">
-        <h1 className="text-4xl font-bold">$0.00</h1>
-        <div className="flex justify-center gap-6 mt-4">
-          <ActionButton icon={<FaPlus size={22} />} text="Buy" />
-          <ActionButton icon={<FaExchangeAlt size={22} />} text="Swap" />
-          <ActionButton icon={<FaArrowUp size={22} />} text="Send" />
-          <ActionButton icon={<FaArrowDown size={22} />} text="Receive" />
-        </div>
-      </div>
-
       {/* Smart Report Section */}
       {isAuthenticated && (
-        <div className="p-4 bg-gray-800 rounded-lg">
-          <h2 className="text-2xl font-semibold">Smart Report</h2>
+        <div className="p-6 bg-gray-800 rounded-lg">
+          <h2 className="text-2xl font-semibold mb-3">Smart Report</h2>
           {reportLoading ? (
             <div className="flex justify-center items-center h-24">
               <div className="loader"></div>
             </div>
-          ) : reportError ? (
-            <p className="text-red-500">{smartReport}</p>
           ) : (
-            <div className="p-3 bg-gray-700 rounded-md mt-2">
-              <p className="text-gray-300">{smartReport}</p>
+            <div className="p-4 bg-gray-700 rounded-md">
+              <h3 className="text-xl font-semibold text-blue-400">Overall Health Score</h3>
+              <p className="text-lg font-bold text-white mt-1">{smartReport.overallHealthScore} / 100</p>
+
+              {/* Suspicious Findings */}
+              {smartReport.suspiciousFindings.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold text-yellow-400">⚠️Suspicious Findings⚠️</h3>
+                  <ul className="list-disc ml-5 text-red-300">
+                    {smartReport.suspiciousFindings.map((finding, index) => (
+                      <li key={index}>{finding}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Security Tips */}
+              {smartReport.securityTips.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold text-green-400">Security Tips</h3>
+                  <ul className="list-disc ml-5 text-green-300">
+                    {smartReport.securityTips.map((tip, index) => (
+                      <li key={index}>{tip}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* AI Insights */}
+              {smartReport.aiInsights.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold text-blue-400">AI Insights</h3>
+                  <p className="text-gray-300 italic">{smartReport.aiInsights[0]}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -159,26 +136,7 @@ const HomePage: React.FC = () => {
       {isAuthenticated && (
         <div className="p-4">
           <h2 className="text-2xl font-semibold mb-2">Recent Transactions</h2>
-          {loading ? (
-            <div className="flex justify-center items-center h-24">
-              <div className="w-12 h-12 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
-            </div>
-          ) : transactions.length > 0 ? (
-            <ul className="mt-4 bg-gray-800 p-4 rounded-lg">
-              {transactions.map((tx: any, index: number) => (
-                <li key={index} className="border-b border-gray-700 p-2">
-                  <p className="text-gray-300">Tx ID: {tx.id}</p>
-                  <p className="text-green-400">From: {tx.from}</p>
-                  <p className="text-red-400">To: {tx.to}</p>
-                  <p className="text-gray-400">
-                    Value: {parseFloat(tx.value) / 1e18} ETH
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-400">No transactions found.</p>
-          )}
+          <TransactionsPage />
         </div>
       )}
 
@@ -193,13 +151,6 @@ const HomePage: React.FC = () => {
 };
 
 /** Fixing missing components */
-const ActionButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
-  <div className="flex flex-col items-center text-gray-300 hover:text-white">
-    <div className="bg-gray-700 p-3 rounded-full">{icon}</div>
-    <span className="mt-1 text-sm">{text}</span>
-  </div>
-);
-
 const BottomNavButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
   <div className="flex flex-col items-center hover:text-white">
     {icon}
