@@ -4,11 +4,13 @@ import WalletConnect from "@walletconnect/client";
 import QRCodeModal from "@walletconnect/qrcode-modal";
 import { usePrivy } from "@privy-io/react-auth";
 import walletImg from "../assets/wallet-img.png";
+import CoinbaseWalletSDK from "@coinbase/wallet-sdk"
 
 function MainPage() {
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
   const [isConnected, setIsConnected] = useState(false); // Track WalletConnect status
+  const [isCoinbaseConnected, setIsCoinbaseConnected] = useState(false)
 
   // Get Privy authentication state
   const { ready, authenticated, login, logout } = usePrivy();
@@ -40,6 +42,37 @@ function MainPage() {
       setIsConnected(false);
     });
   }, []);
+
+  // Initialize Coinbase Wallet
+  const initializeCoinbaseWallet = useCallback(() => {
+    try {
+      const coinbaseWallet = new CoinbaseWalletSDK({
+        appName: "Your App Name",
+        appLogoUrl: "https://example.com/logo.png",
+      })
+
+      const ethereum = coinbaseWallet.makeWeb3Provider({
+        jsonRpcUrl: "https://ethereum-rpc.publicnode.com",
+        chainId: 1, // Mainnet
+        options: "all",
+      })
+
+      ethereum
+        .request({ method: "eth_requestAccounts" })
+        .then((accounts) => {
+          const walletAccounts = accounts as string[]
+          console.log("Coinbase Wallet connected:", walletAccounts[0])
+          setIsCoinbaseConnected(true)
+        })
+        .catch((error) => {
+          console.error("Failed to connect Coinbase Wallet:", error)
+          setIsCoinbaseConnected(false)
+        })
+    } catch (error) {
+      console.error("Failed to initialize Coinbase Wallet:", error)
+      setIsCoinbaseConnected(false)
+    }
+  }, [])
 
   // Handle Login/Logout Actions
   const handleLogin = (type: string) => {
@@ -114,10 +147,10 @@ function MainPage() {
                 WalletConnect
               </button>
               <button
-                onClick={() => handleLogin("Type3")}
+                onClick={() => handleLogin("coinbase")}
                 className="neon-button"
               >
-                Login Type 3
+                {authenticated ? "Logout from Coinbase" : "Login with Coinbase"}
               </button>
             </div>
           </div>
