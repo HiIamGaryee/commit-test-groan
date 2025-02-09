@@ -27,6 +27,7 @@ const HomePage: React.FC = () => {
   const [reportError, setReportError] = useState(false);
   const [loginMethod, setLoginMethod] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [reportLoading, setReportLoading] = useState(true);
 
   /** Retrieve Login Method & Wallet Address from LocalStorage */
   useEffect(() => {
@@ -65,12 +66,15 @@ const HomePage: React.FC = () => {
 
       try {
         // Fetch AI-generated Smart Report
+        setReportLoading(true);
         const reportResponse = await axios.post(AI_REPORT_API_URL, { walletAddress });
         setSmartReport(reportResponse.data.report);
       } catch (error) {
         console.error("AI Report API Error:", error);
         setReportError(true);
         setSmartReport("Error generating report.");
+      } finally {
+        setReportLoading(false);
       }
 
       setLoading(false);
@@ -133,6 +137,24 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
+      {/* Smart Report Section */}
+      {isAuthenticated && (
+        <div className="p-4 bg-gray-800 rounded-lg">
+          <h2 className="text-2xl font-semibold">Smart Report</h2>
+          {reportLoading ? (
+            <div className="flex justify-center items-center h-24">
+              <div className="loader"></div>
+            </div>
+          ) : reportError ? (
+            <p className="text-red-500">{smartReport}</p>
+          ) : (
+            <div className="p-3 bg-gray-700 rounded-md mt-2">
+              <p className="text-gray-300">{smartReport}</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Transactions Section */}
       {isAuthenticated && (
         <div className="p-4">
@@ -160,18 +182,6 @@ const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* Smart Report Section */}
-      {isAuthenticated && (
-        <div className="p-4 bg-gray-800 rounded-lg">
-          <h2 className="text-2xl font-semibold">Smart Report</h2>
-          {reportError ? (
-            <p className="text-red-500">{smartReport}</p>
-          ) : (
-            <p>{smartReport}</p>
-          )}
-        </div>
-      )}
-
       {/* Bottom Navigation */}
       <div className="flex justify-around py-4 border-t border-gray-700 bg-gray-800 text-gray-400">
         <BottomNavButton icon={<AiOutlinePieChart size={24} />} text="Assets" />
@@ -182,7 +192,7 @@ const HomePage: React.FC = () => {
   );
 };
 
-// Action Buttons for Buy, Swap, Send, Receive
+/** Fixing missing components */
 const ActionButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
   <div className="flex flex-col items-center text-gray-300 hover:text-white">
     <div className="bg-gray-700 p-3 rounded-full">{icon}</div>
@@ -190,7 +200,6 @@ const ActionButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
   </div>
 );
 
-// Bottom Navigation Buttons
 const BottomNavButton = ({ icon, text }: { icon: ReactElement; text: string }) => (
   <div className="flex flex-col items-center hover:text-white">
     {icon}
