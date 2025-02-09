@@ -114,7 +114,9 @@ function MainPage() {
       {/* Page Content */}
       <div className="bg-home text-white min-h-screen p-4 flex items-center justify-center">
         <div className="container text-center">
-          <h1 className="text-6xl">Wallet Analytics Platform</h1>
+          <h1 className="text-6xl" style={{ fontFamily: "Anton, sans-serif" }}>
+            Wallet Analytics Platform
+          </h1>
           <p className="text-2xl mt-2">
             Log in with your wallet to access and visualize your transaction
             history with detailed graphs.
