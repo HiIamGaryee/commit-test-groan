@@ -18,7 +18,7 @@ const TailwindDialog: React.FC<TailwindDialogProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
+        className="w-[560px] h-[600px] relative bg-white rounded-lg shadow-xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
